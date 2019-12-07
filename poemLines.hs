@@ -1,5 +1,11 @@
 module PoemLines where
 
+split :: Char -> String -> [String]
+split c = g . dropWhile (==c)
+  where
+      g [] = []
+      g s = (takeWhile (/=c) s) : (g . dropWhile (==c) . dropWhile (/=c) $ s)
+
 firstSen = "Tyger Tyger, burning bright\n"
 secondSen = "In the forests of the night\n"
 thirdSen = "What immortal hand or eye\n"
@@ -14,10 +20,7 @@ sentences = firstSen ++ secondSen
 -- Could frame thy fearful symmetry?
 -- Implement this
 myLines :: String -> [String]
-myLines = g . dropWhile (=='\n')
-  where
-      g [] = []
-      g s = (takeWhile (/='\n') s) : (g . dropWhile (=='\n') . dropWhile (/='\n') $ s)
+myLines = split '\n'
 
 -- What we want 'myLines sentences' to equal
 shouldEqual :: [String]
