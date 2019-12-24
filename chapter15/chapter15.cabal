@@ -15,7 +15,7 @@ extra-source-files:  README.md
 
 executable chapter15
   hs-source-dirs:      exe
-  main-is:             MaybeMonoid.hs
+  main-is:             Main.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , QuickCheck
@@ -26,6 +26,8 @@ library
   exposed-modules:     Optional
                      , First'
                      , MonoidLaw
+                     , SemigroupLaw
+                     , Trivial
   build-depends:       base >= 4.7 && < 5
                      , QuickCheck
   default-language:    Haskell2010
