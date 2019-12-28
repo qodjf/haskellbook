@@ -20,9 +20,7 @@ functorCompose f g x =
 newtype Identity a = Identity a deriving (Show, Eq)
 
 instance (Arbitrary a) => Arbitrary (Identity a) where
-  arbitrary = do
-    a <- arbitrary
-    return (Identity a)
+  arbitrary = fmap Identity arbitrary
 
 instance Functor Identity where
   fmap f (Identity a) = Identity (f a)
