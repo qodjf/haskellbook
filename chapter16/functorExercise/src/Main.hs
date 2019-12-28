@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module Main where
 
 import Test.QuickCheck
@@ -37,6 +39,23 @@ instance (Arbitrary a) => Arbitrary (Pair a) where
 
 instance Functor Pair where
   fmap f (Pair a1 a2) = Pair (f a1) (f a2)
+
+-- FlipFunctor
+newtype Flip f a b =
+  Flip (f b a)
+  deriving (Eq, Show)
+
+newtype K a b = K a
+
+instance Functor (Flip K a) where
+  fmap f (Flip (K b)) = Flip (K (f b))
+
+data Tuple a b =
+  Tuple a b
+  deriving (Eq, Show)
+
+instance Functor (Flip Tuple a) where
+  fmap f (Flip (Tuple a b)) = Flip $ Tuple (f a) b
 
 main :: IO ()
 main = do
