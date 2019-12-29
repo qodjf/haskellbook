@@ -1,6 +1,8 @@
 module List where
 
 import Data.Semigroup
+import Test.QuickCheck
+import Test.QuickCheck.Checkers
 
 data List a =
     Nil
@@ -21,6 +23,14 @@ concat' = fold append Nil
 -- write this one in terms of concat' and fmap
 flatMap :: (a -> List b) -> List a -> List b
 flatMap f = concat' . fmap f
+
+toMyList :: [a] -> List a
+toMyList = foldr Cons Nil
+
+instance (Arbitrary a) => Arbitrary (List a) where
+  arbitrary = toMyList <$> arbitrary
+
+instance (Eq a) => EqProp (List a) where (=-=) = eq
 
 instance Semigroup (List a) where
   (<>) = append

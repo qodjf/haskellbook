@@ -22,7 +22,6 @@ library
 executable listApplicative
   hs-source-dirs:      app
   main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , listApplicative
                      , QuickCheck
