@@ -46,3 +46,34 @@ instance Functor List where
 instance Applicative List where
   pure a = Cons a Nil
   fs <*> as = flatMap (\f -> fmap f as) fs
+
+newtype ZipList' a =
+  ZipList' (List a)
+  deriving (Eq, Show)
+
+instance (Arbitrary a) => Arbitrary (ZipList' a) where
+  arbitrary = ZipList' <$> arbitrary
+
+take' :: Int -> List a -> List a
+take' 0 _ = Nil
+take' _ Nil = Nil
+take' x (Cons a as) = Cons a (take' (x - 1) as)
+
+instance Eq a => EqProp (ZipList' a) where
+  xs =-= ys = xs' `eq` ys'
+    where xs' = let (ZipList' l) = xs
+                in take' 3000 l
+          ys' = let (ZipList' l) = ys
+                in take' 3000 l
+
+instance Functor ZipList' where
+  fmap f (ZipList' xs) = ZipList' $ fmap f xs
+
+zipMyList :: List (a -> b) -> List a -> List b
+zipMyList Nil _ = Nil
+zipMyList _ Nil = Nil
+zipMyList (Cons f fs) (Cons a as) = Cons (f a) (zipMyList fs as)
+
+instance Applicative ZipList' where
+  pure = ZipList' . toMyList . repeat
+  (ZipList' fs) <*> (ZipList' as) = ZipList' $ zipMyList fs as
