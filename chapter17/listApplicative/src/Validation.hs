@@ -14,9 +14,7 @@ instance (Arbitrary e, Arbitrary a) => Arbitrary (Validation e a) where
                (3, Success <$> arbitrary)]
 
 instance (Eq e, Eq a) => EqProp (Validation e a) where
-  Failure e1 =-= Failure e2 = eq e1 e2
-  Success a1 =-= Success a2 = eq a2 a2
-  _ =-= _ = (eq 1 2)
+  (=-=) = eq
 
 instance Functor (Validation e) where
   fmap _ (Failure e) = Failure e
