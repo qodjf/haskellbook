@@ -47,6 +47,9 @@ instance Applicative List where
   pure a = Cons a Nil
   fs <*> as = flatMap (\f -> fmap f as) fs
 
+instance Monad List where
+  la >>= f = flatMap f la
+
 newtype ZipList' a =
   ZipList' (List a)
   deriving (Eq, Show)

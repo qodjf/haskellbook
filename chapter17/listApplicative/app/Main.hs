@@ -15,3 +15,4 @@ main = do
   quickBatch $ applicative (undefined :: ZipList' (Int, Int, Int))
   quickBatch $ monoid (undefined :: List Int)
   quickBatch $ applicative (undefined :: List (String, String, Int))
+  quickBatch $ monad (undefined :: List (String, String, Int))
