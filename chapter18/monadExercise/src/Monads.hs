@@ -68,3 +68,9 @@ instance Applicative Identity where
 instance Monad Identity where
   return = pure
   Identity a >>= f = f a
+
+instance Foldable Identity where
+  foldMap f (Identity a) = f a
+
+instance Traversable Identity where
+  traverse f (Identity a) = Identity <$> f a
