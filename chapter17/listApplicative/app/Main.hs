@@ -1,5 +1,6 @@
 module Main where
 
+import Data.Monoid (Sum)
 import List
 import Test.QuickCheck
 import Test.QuickCheck.Checkers
@@ -9,6 +10,7 @@ import Validation
 
 main :: IO ()
 main = do
+  quickBatch $ traversable (undefined :: List (Int, Int, [Int]))
   quickBatch $ applicative (undefined :: Pair (Int, Int, Int))
   quickBatch $ applicative (undefined :: (Two String) (Int, Int, Int))
   quickBatch $ applicative (undefined :: (Validation String) (Int, Int, Int))

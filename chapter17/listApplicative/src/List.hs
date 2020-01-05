@@ -1,5 +1,6 @@
 module List where
 
+import Control.Applicative (liftA2)
 import Data.Semigroup
 import Test.QuickCheck
 import Test.QuickCheck.Checkers
@@ -49,6 +50,14 @@ instance Applicative List where
 
 instance Monad List where
   la >>= f = flatMap f la
+
+instance Foldable List where
+  foldMap f Nil = mempty
+  foldMap f (Cons a as) = f a <> foldMap f as
+
+instance Traversable List where
+  traverse f Nil = pure Nil
+  traverse f (Cons a as) = liftA2 Cons (f a) (traverse f as)
 
 newtype ZipList' a =
   ZipList' (List a)
