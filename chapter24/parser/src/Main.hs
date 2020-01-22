@@ -1,5 +1,7 @@
 module Main where
 
+import Control.Applicative
+import Data.Ratio ((%))
 import Text.Trifecta
 import Text.Parser.Combinators
 
@@ -24,9 +26,27 @@ int' = do
   eof
   return x
 
+-- decimal or fraction
+parseFraction :: Parser Rational
+parseFraction = do
+  numerator <- decimal
+  char '/'
+  denominator <- decimal
+  return (numerator % denominator)
+
+type DecimalOrFraction = Either Integer Rational
+parseRational :: Parser DecimalOrFraction
+parseRational = do
+      try (Right <$> parseFraction)
+  <|> (Left <$> decimal)
+
 main :: IO ()
 main = do
   testParse one
   print $ parseString (string "1") mempty "1"
   print $ parseString (myString "123") mempty "123"
   print $ parseString int' mempty "2341"
+
+  -- parseRational
+  print $ parseString parseRational mempty "123"
+  print $ parseString parseRational mempty "123/10"
