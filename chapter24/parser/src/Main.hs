@@ -18,8 +18,15 @@ myString (x:xs) = do
   cs <- myString xs
   return (c:cs)
 
+int' :: Parser Integer
+int' = do
+  x <- integer
+  eof
+  return x
+
 main :: IO ()
 main = do
   testParse one
   print $ parseString (string "1") mempty "1"
   print $ parseString (myString "123") mempty "123"
+  print $ parseString int' mempty "2341"
