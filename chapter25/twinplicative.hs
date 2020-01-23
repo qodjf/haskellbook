@@ -24,3 +24,18 @@ instance (Applicative f, Applicative g) => Applicative (Compose f g) where
         -> Compose f g b
   (Compose f) <*> (Compose a) =
     Compose $ liftA2 (<*>) f a
+
+
+instance (Foldable f, Foldable g) =>
+  Foldable (Compose f g) where
+  foldMap :: Monoid m => (a -> m) -> Compose f g a -> m
+  foldMap h (Compose fga) = foldMap (foldMap h) fga
+
+
+instance (Traversable f, Traversable g) =>
+  Traversable (Compose f g) where
+  traverse :: Applicative m => (a -> m b) -> Compose f g a -> m (Compose f g b)
+  -- h :: a -> m b
+  -- traverse h :: g a -> m (g b)
+  -- traverse (traverse h) :: f (g a) -> m (f (g b))
+  traverse h (Compose fga) = Compose <$> traverse (traverse h) fga
