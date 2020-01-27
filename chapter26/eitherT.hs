@@ -1,4 +1,5 @@
 import Control.Applicative (liftA2)
+import Control.Monad.Trans.Class
 
 newtype EitherT e m a =
   EitherT { runEitherT :: m (Either e a) }
@@ -34,3 +35,6 @@ eitherT :: Monad m =>
         -> EitherT a m b
         -> m c
 eitherT fa fb (EitherT mab) = mab >>= either fa fb
+
+instance MonadTrans (EitherT e) where
+  lift = EitherT . fmap Right

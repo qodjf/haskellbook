@@ -1,4 +1,5 @@
 {-# LANGUAGE InstanceSigs #-}
+import Control.Monad.Trans.Class
 
 newtype StateT s m a =
   StateT { runStateT :: s -> m (a,s) }
@@ -24,3 +25,8 @@ instance (Monad m) => Monad (StateT s m) where
   StateT sma >>= f = StateT $ \s -> do
     (a, s1) <- sma s
     runStateT (f a) s1
+
+instance MonadTrans (StateT s) where
+  lift m = StateT $ \s ->
+    a <- m
+    return (a, s)
