@@ -40,6 +40,12 @@ parseRational = do
       try (Right <$> parseFraction)
   <|> (Left <$> decimal)
 
+parseDigit :: Parser Char
+parseDigit = satisfy (\c -> c >= '0' && c <= '9')
+
+base10Integer :: Parser Integer
+base10Integer = read <$> some parseDigit
+
 main :: IO ()
 main = do
   testParse one
