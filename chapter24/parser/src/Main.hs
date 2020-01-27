@@ -51,6 +51,26 @@ base10Integer' = read <$>
       (((:) <$> char '-' <*> some parseDigit)
    <|> (some parseDigit))
 
+-- parse phone number
+type NumberingPlanArea = Int -- aka area code
+type Exchange = Int
+type LineNumber = Int
+
+data PhoneNumber =
+  PhoneNumber NumberingPlanArea Exchange LineNumber
+  deriving (Eq, Show)
+
+parseInt :: Parser Int
+parseInt = fromInteger <$> integer
+
+parsePhone :: Parser PhoneNumber
+parsePhone =
+      try (PhoneNumber <$> parseInt <* char '-' <*> parseInt <* char '-' <*> parseInt <* eof)
+  <|> try (PhoneNumber <$> (parseInt *> char '-' *> parseInt <* char '-') <*> parseInt <* char '-' <*> parseInt <* eof)
+  <|> (PhoneNumber <$> (char '(' *> parseInt <* string ") ") <*> parseInt <* char '-' <*> parseInt)
+  <|> (PhoneNumber <$> (read <$> count 3 digit) <*> (read <$> count 3 digit) <*> parseInt)
+
+
 main :: IO ()
 main = do
   testParse one
@@ -61,3 +81,9 @@ main = do
   -- parseRational
   print $ parseString parseRational mempty "123"
   print $ parseString parseRational mempty "123/10"
+
+  -- parsePhone
+  print $ parseString parsePhone mempty "123-456-7890"
+  print $ parseString parsePhone mempty "1234567890"
+  print $ parseString parsePhone mempty "(123) 456-7890"
+  print $ parseString parsePhone mempty "1-123-456-7890"
