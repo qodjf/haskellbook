@@ -46,6 +46,11 @@ parseDigit = satisfy (\c -> c >= '0' && c <= '9')
 base10Integer :: Parser Integer
 base10Integer = read <$> some parseDigit
 
+base10Integer' :: Parser Integer
+base10Integer' = read <$>
+      (((:) <$> char '-' <*> some parseDigit)
+   <|> (some parseDigit))
+
 main :: IO ()
 main = do
   testParse one
