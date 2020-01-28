@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Applicative
+import Data.Char
 import Data.Ratio ((%))
 import Data.Word
 import Text.Trifecta
@@ -85,6 +86,42 @@ calculateIpv4 a b c d = IPAddress $ ((a * 256 + b) * 256 + c) * 256 + d
 parseIpv4 :: Parser IPAddress
 parseIpv4 = calculateIpv4 <$> (parseWord32 <* char '.') <*> (parseWord32 <* char '.') <*> (parseWord32 <* char '.') <*> (parseWord32 <* eof)
 
+-- parse IPv6
+data IPAddress6 =
+  IPAddress6 Word64 Word64
+  deriving (Eq, Ord, Show)
+
+acc :: Int -> Char -> Int
+acc a c = a * 16 + digitToInt c
+
+parseSeg :: Parser String
+parseSeg = many (noneOf ":")
+
+parseSegs :: Parser [String]
+parseSegs = sepBy parseSeg (char ':')
+
+fillSegs :: [String] -> [String]
+fillSegs segs = case 8 - length segs of
+  0 -> segs
+  d -> g d segs
+  where
+    g :: Int -> [String] -> [String]
+    g _ [] = []
+    g d (x:xs) = if null x then replicate d "" ++ (x:xs) else (x : g d xs)
+
+segsToWords :: [String] -> [Word64]
+segsToWords = fmap (toEnum . foldl acc 0)
+
+accShort :: Word64 -> Word64 -> Word64
+accShort b a = b * 65536 + a
+
+words2IPv6 :: [Word64] -> IPAddress6
+words2IPv6 (a:b:c:d:xs) = IPAddress6 (foldl accShort 0 [a, b, c, d]) (foldl accShort 0 xs)
+words2IPv6 _ = IPAddress6 0 0
+
+parseIPv6 :: Parser IPAddress6
+parseIPv6 = words2IPv6 . segsToWords . fillSegs <$> parseSegs
+
 main :: IO ()
 main = do
   testParse one
@@ -105,3 +142,11 @@ main = do
   -- parseIpv4
   print $ parseString parseIpv4 mempty "172.16.254.1"
   print $ parseString parseIpv4 mempty "204.120.0.15"
+
+  -- parseIPv6
+  print $ parseString hexadecimal mempty "xFE01"
+  print $ parseString parseIPv6 mempty "0:0:0:0:0:ffff:ac10:fe01"
+  print $ parseString parseIPv6 mempty "0:0:0:0:0:ffff:cc78:f"
+  print $ parseString parseIPv6 mempty "FE80:0000:0000:0000:0202:B3FF:FE1E:8329"
+  print $ parseString parseIPv6 mempty "FE80::0202:B3FF:FE1E:8329"
+  print $ parseString parseIPv6 mempty "2001:DB8::8:800:200C:417A"
