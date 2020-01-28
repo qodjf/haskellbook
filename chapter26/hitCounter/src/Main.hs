@@ -31,14 +31,18 @@ type Handler = ActionT Text (ReaderT Config IO)
 bumpBoomp :: Text
           -> M.Map Text Integer
           -> (M.Map Text Integer, Integer)
-bumpBoomp k m = undefined
+bumpBoomp k m = case M.lookup k m of
+  Just c -> (M.insert k (c + 1) m, c + 1)
+  Nothing -> (M.insert k 1 m, 1)
 
 app :: Scotty ()
 app =
   get "/:key" $ do
     unprefixed <- param "key"
-    let key' = mappend undefined unprefixed
-    newInteger <- undefined
+    prefix' <- lift . ReaderT $ return . prefix
+    let key' = mappend prefix' unprefixed
+    (newCounts, newInteger) <- lift . ReaderT $ fmap (bumpBoomp key') . readIORef . counts
+    _ <- lift . ReaderT $ \config -> writeIORef (counts config) newCounts
     html $ mconcat [ "<h1>Success! Count was: "
                    , TL.pack $ show newInteger
                    , "</h1>"
@@ -48,7 +52,7 @@ main :: IO ()
 main = do
     [prefixArg] <- getArgs
     counter <- newIORef M.empty
-    let config = undefined
-        runR = undefined
+    let config = Config counter (TL.pack prefixArg)
+        runR m = runReaderT m config
     scottyT 3000 runR app
 
