@@ -2,6 +2,7 @@ module Main where
 
 import Control.Applicative
 import Data.Ratio ((%))
+import Data.Word
 import Text.Trifecta
 import Text.Parser.Combinators
 
@@ -70,6 +71,19 @@ parsePhone =
   <|> (PhoneNumber <$> (char '(' *> parseInt <* string ") ") <*> parseInt <* char '-' <*> parseInt)
   <|> (PhoneNumber <$> (read <$> count 3 digit) <*> (read <$> count 3 digit) <*> parseInt)
 
+-- parse Ipv4
+data IPAddress =
+  IPAddress Word32
+  deriving (Eq, Ord, Show)
+
+parseWord32 :: Parser Word32
+parseWord32 = read <$> some (noneOf ".")
+
+calculateIpv4 :: Word32 -> Word32 -> Word32 -> Word32 -> IPAddress
+calculateIpv4 a b c d = IPAddress $ ((a * 256 + b) * 256 + c) * 256 + d
+
+parseIpv4 :: Parser IPAddress
+parseIpv4 = calculateIpv4 <$> (parseWord32 <* char '.') <*> (parseWord32 <* char '.') <*> (parseWord32 <* char '.') <*> (parseWord32 <* eof)
 
 main :: IO ()
 main = do
@@ -87,3 +101,7 @@ main = do
   print $ parseString parsePhone mempty "1234567890"
   print $ parseString parsePhone mempty "(123) 456-7890"
   print $ parseString parsePhone mempty "1-123-456-7890"
+
+  -- parseIpv4
+  print $ parseString parseIpv4 mempty "172.16.254.1"
+  print $ parseString parseIpv4 mempty "204.120.0.15"
