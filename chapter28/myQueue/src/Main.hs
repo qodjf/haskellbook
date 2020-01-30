@@ -1,6 +1,7 @@
 module Main where
 
 import Criterion.Main
+import Data.Sequence hiding (reverse, empty)
 
 class Que f where
   empty :: f a
@@ -36,6 +37,15 @@ instance Que ListQueue where
   pop (ListQueue []) = Nothing
   pop (ListQueue (x:xs)) = Just (x, ListQueue xs)
 
+-- Sequence
+instance Que Seq where
+  empty = fromList []
+  push x seq = seq |> x
+  pop seq =
+    case viewl seq of
+      EmptyL -> Nothing
+      (x :< xs) -> Just (x, xs)
+
 -- benchmark
 constructQueue :: Que q => Int -> q Int
 constructQueue n = go n empty
@@ -51,9 +61,11 @@ headQueue q = go q 0
 main :: IO ()
 main = do
   putStrLn . show $ pop (push 4 (push 3 (empty :: Queue Int)))
+  putStrLn . show $ pop (push 4 (push 3 (empty :: Seq Int)))
   putStrLn . show $ pop (push 4 (push 3 (empty :: ListQueue Int)))
 
   defaultMain [
       bench "queue" $ whnf ((headQueue :: Queue Int -> Int) . constructQueue) 12345
+    , bench "sequence" $ whnf ((headQueue :: Seq Int -> Int) . constructQueue) 12345
     , bench "list" $ whnf ((headQueue :: ListQueue Int -> Int) . constructQueue) 12345
     ]
